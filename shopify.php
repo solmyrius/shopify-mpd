@@ -632,9 +632,9 @@ class shopify_mpd{
 	}
 }
 
-$sm = new shopify_mpd();
-$sm->smpd_iterate_products();
+//$sm = new shopify_mpd();
+//$sm->smpd_iterate_products();
 
-print_r($sm->condition_list);
+//print_r($sm->condition_list);
 
 ?>
