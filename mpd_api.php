@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/env_config.php';
+// require_once __DIR__ . '/env_config.php';
 
 class mpd_api{
 
