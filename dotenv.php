@@ -1,5 +1,5 @@
 <?php
-if file_exists(".env"){
+if(file_exists(".env")){
 
 	$f = fopen(".env","r");
 
