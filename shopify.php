@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/env_config.php';
+//require_once __DIR__ . '/env_config.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
-require_once __DIR__ . '/db_mysql.php';
+//require_once __DIR__ . '/db_mysql.php';
 require_once __DIR__ . '/mpd_api.php';
 require_once __DIR__ . '/helper.php';
 
