@@ -1,9 +1,8 @@
 <?php
-//require_once __DIR__ . '/env_config.php';
 require_once __DIR__ . '/dotenv.php';
 require_once __DIR__ . '/vendor/autoload.php';
 
-//require_once __DIR__ . '/db_mysql.php';
+require_once __DIR__ . '/db_mysql.php';
 require_once __DIR__ . '/mpd_api.php';
 require_once __DIR__ . '/helper.php';
 
@@ -95,6 +94,7 @@ class shopify_product{
 			$this->load_shopify_meta();
 		}
 
+		$this->mpd_product = null;
 		$mpd_product = [];
 
 		// Currently we process only products with exactly 1 variant
@@ -477,7 +477,7 @@ class shopify_mpd{
 		if(!is_null($this->last_mpd)){
 
 			$db->query("UPDATE product_map SET mpd_product_last = mpd_product WHERE shopify_id='".$product->get_shopify_id()."'");
-			$db->query("UPDATE product_map SET mpd_id='".$this->last_mpd->id."', mpd_hash='".$product->get_mpd_hash()."', sku='".$product->get_sku()."', last_update='".$ts."', is_visible='".intval($product->is_visible())."', mpd_product='".$db->escape(json_encode($this->last_mpd))."' WHERE shopify_id='".$product->get_shopify_id()."'");
+			$db->query("UPDATE product_map SET mpd_id='".$this->last_mpd->id."', mpd_hash='".$product->get_mpd_hash()."', sku='".$product->get_sku()."', last_update='".$ts."', is_visible='".intval($product->is_visible())."', mpd_product='".$db->escape(json_encode($product->get_mpd_product()))."' WHERE shopify_id='".$product->get_shopify_id()."'");
 		}
 	}
 
@@ -489,27 +489,31 @@ class shopify_mpd{
 
 		$this->smpd_product_transfer($product);
 
+		$shopify_mpd = [
+			'shopify_id' => $product->get_shopify_id(),
+			'mpd_id' => 0,
+			'mpd_hash' => '',
+			'sku' => $product->get_sku(),
+			'last_update' => date('Y-m-d H:i:s'),
+			'is_visible' => intval($product->is_visible()),
+			'mpd_product' => '',
+			];
+
 		if(!is_null($this->last_mpd)){
 
-			$shopify_mpd = [
-				'shopify_id' => $product->get_shopify_id(),
-				'mpd_id' => $this->last_mpd->id,
-				'mpd_hash' => $product->get_mpd_hash(),
-				'sku' => $product->get_sku(),
-				'last_update' => date('Y-m-d H:i:s'),
-				'is_visible' => intval($product->is_visible()),
-				'mpd_product' => $db->escape(json_encode($this->last_mpd)),
-				];
-
-			$db->insert_row('product_map', $shopify_mpd);
+			$shopify_mpd['mpd_id'] = $this->last_mpd->id;
+			$shopify_mpd['mpd_hash'] = $product->get_mpd_hash();
+			$shopify_mpd['mpd_product'] = $db->escape(json_encode($product->get_mpd_product()));
 		}
+
+		$db->insert_row('product_map', $shopify_mpd);
 
 		$this->count_new = $this->count_new+1;
 	}
 
 	function smpd_product_transfer($product){
 
-		global $mpd_api;
+		global $mpd_api, $db;
 
 		$this->last_mpd = null;
 		$mpd_product = $product->get_mpd_product();
@@ -521,6 +525,11 @@ class shopify_mpd{
 		}else{
 
 			$res = $mpd_api->put_product($mpd_product);
+
+			$db->insert_row('mpd_log', [
+				'ts' => date("Y-m-d H:i:s"),
+				'last_mpd' => $db->escape(json_encode($res)),
+				]);
 
 			if(!is_array($res)){
 
@@ -633,8 +642,8 @@ class shopify_mpd{
 	}
 }
 
-//$sm = new shopify_mpd();
-//$sm->smpd_iterate_products();
+$sm = new shopify_mpd();
+$sm->smpd_iterate_products();
 
 //print_r($sm->condition_list);
 

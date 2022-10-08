@@ -1,6 +1,4 @@
 <?php
-// require_once __DIR__ . '/env_config.php';
-
 class mpd_api{
 
 	var $mpd_categories;
@@ -335,6 +333,8 @@ class mpd_api{
 				$fields = $cat->requiredFields;
 			}
 		}
+
+		asort($fields);
 
 		return $fields;
 	}

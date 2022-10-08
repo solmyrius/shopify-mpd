@@ -1,4 +1,5 @@
 <?php
+/*
 if(file_exists(".env")){
 
 	$f = fopen(".env","r");
@@ -21,4 +22,8 @@ if(file_exists(".env")){
 		}
 	}
 }
+*/
+
+require_once __DIR__ . '/env_config.php';
+
 ?>
